@@ -38,26 +38,6 @@ public class GitServiceImpl implements GitService {
 	private String repositoryLocation;
 
 	@Override
-	public void printStatus() throws GitAPIException {
-		try (final Git git = getGit()) {
-			final Status status = git.status().call();
-			System.out.println("Added: " + status.getAdded());
-			System.out.println("Changed: " + status.getChanged());
-			System.out.println("Conflicting: " + status.getConflicting());
-			System.out.println("ConflictingStageState: "
-					+ status.getConflictingStageState());
-			System.out.println("IgnoredNotInIndex: "
-					+ status.getIgnoredNotInIndex());
-			System.out.println("Missing: " + status.getMissing());
-			System.out.println("Modified: " + status.getModified());
-			System.out.println("Removed: " + status.getRemoved());
-			System.out.println("Untracked: " + status.getUntracked());
-			System.out.println("UntrackedFolders: "
-					+ status.getUntrackedFolders());
-		}
-	}
-
-	@Override
 	public Set<String> getChangedFilenames() throws NoWorkTreeException,
 			GitAPIException {
 		final Set<String> result = new HashSet<String>();
@@ -100,7 +80,7 @@ public class GitServiceImpl implements GitService {
 	}
 
 	@Override
-	public void commit(Set<String> filenames, String commitMessage)
+	public void commit(String commitMessage, String... filenames)
 			throws GitAPIException {
 		try (final Git git = getGit()) {
 			final AddCommand addCommand = git.add();
