@@ -3,4 +3,4 @@
  * @author niels
  *
  */
-package com.github.opensource21.vsynchistory.service;
+package com.github.opensource21.vsynchistory.service.impl;

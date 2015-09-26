@@ -1,4 +1,4 @@
-package com.github.opensource21.vsynchistory.service;
+package com.github.opensource21.vsynchistory.service.api;
 
 import java.io.IOException;
 import java.io.InputStream;

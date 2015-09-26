@@ -1,4 +1,4 @@
-package com.github.opensource21.vsynchistory.service;
+package com.github.opensource21.vsynchistory.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +24,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.github.opensource21.vsynchistory.service.api.GitService;
 
 /**
  * Everything to handle the git-repo.
