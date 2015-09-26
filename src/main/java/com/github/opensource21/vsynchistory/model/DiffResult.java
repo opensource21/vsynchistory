@@ -43,6 +43,10 @@ public class DiffResult {
 		return commitMessage;
 	}
 
+	public int getTotalChanges() {
+		return nrOfDeletedEntries + nrOfChangedEntries + nrOfNewEntries;
+	}
+
 
 
 }

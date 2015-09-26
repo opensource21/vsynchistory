@@ -17,8 +17,12 @@ import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Content;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.DtStart;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.github.opensource21.vsynchistory.model.DiffResult;
@@ -56,7 +60,8 @@ public class CalendarServiceImpl implements CalendarService {
 		for (final String vEventId : possibleChangedIds) {
 			final VEvent oldEvent = oldEntries.get(vEventId);
 			final VEvent newEvent = newEntries.get(vEventId);
-			if (!oldEvent.equals(newEvent)) {
+			final String change = getChanges(oldEvent, newEvent);
+			if (StringUtils.isNotEmpty(change)) {
 				nrOfChangedEvents++;
 				message.append("CHANGED - FROM: ")
 						.append(createDescription(oldEvent, keyDateFormat))
@@ -64,6 +69,7 @@ public class CalendarServiceImpl implements CalendarService {
 				message.append("CHANGED -  TO : ")
 						.append(createDescription(newEvent, keyDateFormat))
 						.append("\n");
+				message.append(change).append("\n");
 			}
 
 		}
@@ -122,6 +128,67 @@ public class CalendarServiceImpl implements CalendarService {
 			sb.append(event.getDescription().getValue().trim());
 		}
 		return sb.toString();
+	}
+
+	private String getChanges(VEvent oldEvent, VEvent newEvent) {
+		final StringBuilder sb = new StringBuilder();
+		if (!oldEvent.getStartDate().getDate().equals(newEvent.getStartDate().getDate())) {
+			addChangeMessage(sb, oldEvent.getStartDate(), newEvent.getStartDate());
+		}
+		if (!oldEvent.getEndDate().getDate().equals(newEvent.getEndDate().getDate())) {
+			addChangeMessage(sb, oldEvent.getEndDate(), newEvent.getEndDate());
+		}
+		if (!equals(oldEvent.getSummary(), newEvent.getSummary())) {
+			addChangeMessage(sb, oldEvent.getSummary(), newEvent.getSummary());
+		}
+		if (!equals(oldEvent.getDescription(), newEvent.getDescription())) {
+			addChangeMessage(sb, oldEvent.getDescription(), newEvent.getDescription());
+		}
+		if (!equals(oldEvent.getProperty(Property.RRULE), newEvent.getProperty(Property.RRULE))) {
+			addChangeMessage(sb, oldEvent.getProperty(Property.RRULE), newEvent.getProperty(Property.RRULE));
+		}
+		if (!equals(oldEvent.getLocation(), newEvent.getLocation())) {
+			addChangeMessage(sb, oldEvent.getLocation(), newEvent.getLocation());
+		}
+		return sb.toString();
+	}
+
+	private void addChangeMessage(StringBuilder sb, Content oldContent, Content newContent) {
+		final String name;
+		if (oldContent != null) {
+			name = oldContent.getName();
+		} else {
+			name = newContent.getName();
+		}
+		sb.append(name).append(": ");
+		addContent(sb, oldContent);
+		sb.append(" -> ");
+		addContent(sb, newContent);
+		sb.append(" ");
+	}
+
+	private void addContent(StringBuilder sb, Content content) {
+		if (content == null) {
+			return;
+		}
+		if (content instanceof DtStart) {
+			sb.append(((DtStart)content).getDate());
+		} else {
+			sb.append(content.getValue());
+		}
+	}
+
+
+	private boolean equals(Content v1, Content v2) {
+		if (v1 == null) {
+			return v2 == null;
+		}
+		if (v2 == null) {
+			return false;
+		}
+
+		final boolean result = v1.equals(v2);
+		return result;
 	}
 
 }

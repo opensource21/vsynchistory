@@ -48,29 +48,33 @@ public class CommandlineController implements CommandLineRunner {
 			oldContent.read(typeAsBytes);
 			final String type = new String(typeAsBytes);
 			oldContent.reset();
-			String commitMessage;
+			final DiffResult diffResult;
 			if (CALENDAR.equals(type)) {
-				final DiffResult diffResult = calendarService.compare(
-						oldContent, changes.getNewContent());
-
-				commitMessage = changedFile + " : -"
-						+ diffResult.getNrOfDeletedEntries() + " +"
-						+ diffResult.getNrOfNewEntries() + " ~"
-						+ diffResult.getNrOfChangedEntries() + "\n"
-						+ diffResult.getCommitMessage();
+				diffResult = calendarService.compare(oldContent, changes.getNewContent());
 			} else if (type.startsWith(ADDRESS)) {
-				commitMessage = "CARD";
+				diffResult = null;
 			} else {
-				commitMessage = null;
+				diffResult = null;
 			}
 
-			if (commitMessage == null) {
+			if (diffResult == null) {
 				if (!changedFile.endsWith(PROPS_FILESUFFIX)) {
 					LOG.error("Unhandled file {}.", changedFile);
 				}
 			} else {
-				gitService.commit(commitMessage, changedFile, changedFile
+				final StringBuilder commitMessage = new StringBuilder();
+				commitMessage.append(changedFile).append(" :");
+				commitMessage.append(" -").append(diffResult.getNrOfDeletedEntries());
+				commitMessage.append(" ~").append(diffResult.getNrOfChangedEntries());
+				commitMessage.append(" +").append(diffResult.getNrOfNewEntries());
+				if (diffResult.getTotalChanges() > 10) {
+					LOG.error("Many changes: {}", commitMessage);
+				}
+				commitMessage.append("\n");
+				commitMessage.append(diffResult.getCommitMessage());
+				gitService.commit(commitMessage.toString(), changedFile, changedFile
 						+ PROPS_FILESUFFIX);
+
 			}
 		}
 	}
