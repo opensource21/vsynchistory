@@ -104,6 +104,10 @@ public class GitServiceImpl implements GitService {
 		if (!repoDir.getName().endsWith("git")) {
 			repoDir = new File(repoDir, ".git");
 		}
+		if (!repoDir.exists()) {
+			throw new IllegalStateException("The repository "
+					+ repoDir.getAbsolutePath() + " doesn't  exist.");
+		}
 		try {
 			final FileRepositoryBuilder builder = new FileRepositoryBuilder();
 			return builder.setGitDir(repoDir).readEnvironment() // scan
