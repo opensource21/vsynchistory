@@ -3,26 +3,34 @@
  */
 package com.github.opensource21.vsynchistory.service.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Content;
 import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.DtStart;
+import net.fortuna.ical4j.model.property.DateProperty;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.github.opensource21.vsynchistory.model.DiffResult;
@@ -34,6 +42,57 @@ import com.github.opensource21.vsynchistory.service.api.CalendarService;
  */
 @Service
 public class CalendarServiceImpl implements CalendarService {
+
+	@Value(value = "${repositoryLocation}")
+	private String repositoryLocation;
+
+	@Override
+	public String archive(String user) throws IOException, ParserException,
+			ValidationException {
+		// Harcoded is easier
+		final File repoDir = new File(repositoryLocation);
+		Date lastModifiedLimit = DateUtils.truncate(new Date(),
+				java.util.Calendar.YEAR);
+		lastModifiedLimit = DateUtils.addMonths(lastModifiedLimit, -6);
+		int moved = 0;
+		final File currentFile = new File(repoDir, "volatil/" + user);
+		final File archiveFile = new File(repoDir, "stabil/" + user + "_archiv");
+		final CalendarBuilder builder = new CalendarBuilder();
+		final Calendar currentCalendar = builder.build(new FileInputStream(
+				currentFile));
+		final ComponentList allCurrentEntries = currentCalendar
+				.getComponents(Component.VEVENT);
+		final Calendar archiveCalendar = builder.build(new FileInputStream(
+				archiveFile));
+		for (final Object eventObj : allCurrentEntries) {
+			final VEvent event = (VEvent) eventObj;
+
+			final Date modifiedDate = getDate(event.getLastModified());
+			final Date endDate = getDate(event.getEndDate());
+			final Date referenceDate;
+			if (modifiedDate == null || modifiedDate.before(endDate)) {
+				referenceDate = endDate;
+			} else {
+				referenceDate = modifiedDate;
+			}
+			if (referenceDate.before(lastModifiedLimit)) {
+				currentCalendar.getComponents().remove(event);
+				archiveCalendar.getComponents().add(event);
+				moved++;
+			}
+		}
+		final CalendarOutputter outputter = new CalendarOutputter(false);
+		outputter.output(currentCalendar, new FileOutputStream(currentFile));
+		outputter.output(archiveCalendar, new FileOutputStream(archiveFile));
+		if (moved > 0) {
+			final StringBuilder sb = new StringBuilder();
+			sb.append("Move for ").append(user).append(' ').append(moved)
+					.append(" Entries.");
+			return sb.toString();
+		} else {
+			return null;
+		}
+	}
 
 	@Override
 	public DiffResult compare(InputStream oldCalendar, InputStream newCalendar)
@@ -132,20 +191,26 @@ public class CalendarServiceImpl implements CalendarService {
 
 	private String getChanges(VEvent oldEvent, VEvent newEvent) {
 		final StringBuilder sb = new StringBuilder();
-		if (!oldEvent.getStartDate().getDate().equals(newEvent.getStartDate().getDate())) {
-			addChangeMessage(sb, oldEvent.getStartDate(), newEvent.getStartDate());
+		if (!oldEvent.getStartDate().getDate()
+				.equals(newEvent.getStartDate().getDate())) {
+			addChangeMessage(sb, oldEvent.getStartDate(),
+					newEvent.getStartDate());
 		}
-		if (!oldEvent.getEndDate().getDate().equals(newEvent.getEndDate().getDate())) {
+		if (!oldEvent.getEndDate().getDate()
+				.equals(newEvent.getEndDate().getDate())) {
 			addChangeMessage(sb, oldEvent.getEndDate(), newEvent.getEndDate());
 		}
 		if (!equals(oldEvent.getSummary(), newEvent.getSummary())) {
 			addChangeMessage(sb, oldEvent.getSummary(), newEvent.getSummary());
 		}
 		if (!equals(oldEvent.getDescription(), newEvent.getDescription())) {
-			addChangeMessage(sb, oldEvent.getDescription(), newEvent.getDescription());
+			addChangeMessage(sb, oldEvent.getDescription(),
+					newEvent.getDescription());
 		}
-		if (!equals(oldEvent.getProperty(Property.RRULE), newEvent.getProperty(Property.RRULE))) {
-			addChangeMessage(sb, oldEvent.getProperty(Property.RRULE), newEvent.getProperty(Property.RRULE));
+		if (!equals(oldEvent.getProperty(Property.RRULE),
+				newEvent.getProperty(Property.RRULE))) {
+			addChangeMessage(sb, oldEvent.getProperty(Property.RRULE),
+					newEvent.getProperty(Property.RRULE));
 		}
 		if (!equals(oldEvent.getLocation(), newEvent.getLocation())) {
 			addChangeMessage(sb, oldEvent.getLocation(), newEvent.getLocation());
@@ -153,7 +218,8 @@ public class CalendarServiceImpl implements CalendarService {
 		return sb.toString();
 	}
 
-	private void addChangeMessage(StringBuilder sb, Content oldContent, Content newContent) {
+	private void addChangeMessage(StringBuilder sb, Content oldContent,
+			Content newContent) {
 		final String name;
 		if (oldContent != null) {
 			name = oldContent.getName();
@@ -171,13 +237,12 @@ public class CalendarServiceImpl implements CalendarService {
 		if (content == null) {
 			return;
 		}
-		if (content instanceof DtStart) {
-			sb.append(((DtStart)content).getDate());
+		if (content instanceof DateProperty) {
+			sb.append(((DateProperty) content).getDate());
 		} else {
 			sb.append(content.getValue());
 		}
 	}
-
 
 	private boolean equals(Content v1, Content v2) {
 		if (v1 == null) {
@@ -189,6 +254,13 @@ public class CalendarServiceImpl implements CalendarService {
 
 		final boolean result = v1.equals(v2);
 		return result;
+	}
+
+	private Date getDate(DateProperty content) {
+		if (content == null) {
+			return null;
+		}
+		return content.getDate();
 	}
 
 }

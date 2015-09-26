@@ -1,10 +1,15 @@
 package com.github.opensource21.vsynchistory.controller;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
 import javax.annotation.Resource;
 
+import net.fortuna.ical4j.data.ParserException;
+
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -40,6 +45,19 @@ public class CommandlineController implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+		commitChanges("");
+		final String[] users = { "gunda", "niels" };
+		for (final String user : users) {
+			final String changes = calendarService.archive(user);
+			if (StringUtils.isNotEmpty(changes)) {
+				commitChanges(changes + "\n");
+			}
+		}
+
+	}
+
+	private void commitChanges(String additionalCommitMessage) throws GitAPIException, IOException,
+			ParserException {
 		final Set<String> changedFilenames = gitService.getChangedFilenames();
 		for (final String changedFile : changedFilenames) {
 			final ContentTupel changes = gitService.getContents(changedFile);
@@ -62,7 +80,7 @@ public class CommandlineController implements CommandLineRunner {
 					LOG.error("Unhandled file {}.", changedFile);
 				}
 			} else {
-				final StringBuilder commitMessage = new StringBuilder();
+				final StringBuilder commitMessage = new StringBuilder(additionalCommitMessage);
 				commitMessage.append(changedFile).append(" :");
 				commitMessage.append(" -").append(diffResult.getNrOfDeletedEntries());
 				commitMessage.append(" ~").append(diffResult.getNrOfChangedEntries());
