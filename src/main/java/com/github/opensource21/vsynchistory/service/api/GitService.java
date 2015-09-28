@@ -24,13 +24,21 @@ public interface GitService {
 	ContentTupel getContents(String filename) throws  GitAPIException, IOException;
 
 	/**
-	 * Commit the given files.
+	 * Commit the given files if they are in the index.
 	 * @param commitMessage the commit message.
 	 * @param filenames the name of the files which should be added.
 	 * @throws GitAPIException
 	 */
 	void commit(String commitMessage, String... filenames) throws  GitAPIException;
 
+	/**
+     * Add the given files.
+     * @param filenames the name of the files which should be added.
+     * @throws GitAPIException
+     */
+    void add(String... filenames) throws  GitAPIException;
+
+	
 	/**
 	 * A tupel of contents.
 	 * @author niels

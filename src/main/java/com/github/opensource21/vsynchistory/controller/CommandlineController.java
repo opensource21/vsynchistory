@@ -68,6 +68,7 @@ public class CommandlineController implements CommandLineRunner {
 			oldContent.reset();
 			final DiffResult diffResult;
 			if (CALENDAR.equals(type)) {
+		        gitService.add(changedFile, changedFile + PROPS_FILESUFFIX);
 				diffResult = calendarService.compare(oldContent, changes.getNewContent());
 			} else if (type.startsWith(ADDRESS)) {
 				diffResult = null;

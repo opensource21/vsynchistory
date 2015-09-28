@@ -85,13 +85,20 @@ public class GitServiceImpl implements GitService {
 	public void commit(String commitMessage, String... filenames)
 			throws GitAPIException {
 		try (final Git git = getGit()) {
-			final AddCommand addCommand = git.add();
-			for (final String filename : filenames) {
-				addCommand.addFilepattern(filename);
-			}
-			addCommand.call();
 			git.commit().setMessage(commitMessage).call();
 		}
+	}
+	
+	@Override
+	public void add(String... filenames) throws GitAPIException {
+        try (final Git git = getGit()) {
+            final AddCommand addCommand = git.add();
+            for (final String filename : filenames) {
+                addCommand.addFilepattern(filename);
+            }
+            addCommand.call();
+        }
+	    
 	}
 
 	private final Git getGit() {
