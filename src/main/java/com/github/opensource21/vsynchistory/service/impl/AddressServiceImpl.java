@@ -44,6 +44,8 @@ import ezvcard.property.Title;
 @Service
 public class AddressServiceImpl implements AddressService {
 
+    private static final String DATE_FORMAT_WITH_TIME = "dd.MM.yyyy HH:mm:ss";
+
     @Override
     public DiffResult compare(InputStream oldAddressbook,
             InputStream newAddressbook) throws IOException {
@@ -59,7 +61,7 @@ public class AddressServiceImpl implements AddressService {
 
         final StringBuilder message = new StringBuilder();
         final DateFormat keyDateFormat =
-                new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                new SimpleDateFormat(DATE_FORMAT_WITH_TIME);
         for (final String vCardId : deletedIds) {
             message.append("DELETED: ")
                     .append(createDescription(oldEntries.get(vCardId),
@@ -94,7 +96,13 @@ public class AddressServiceImpl implements AddressService {
         final ParserChainTextReader cardReader = Ezvcard.parse(oldAddressbook);
         final Map<String, VCard> result = new HashMap<>();
         for (VCard addressCard : cardReader.all()) {
-            result.put(addressCard.getUid().getValue(), addressCard);
+            final String key;
+            if (addressCard.getUid() == null) {
+                key = createDescription(addressCard, new SimpleDateFormat(DATE_FORMAT_WITH_TIME));
+            } else {
+                key = addressCard.getUid().getValue();
+            }
+            result.put(key, addressCard);
         }
         return result;
     }
@@ -117,6 +125,7 @@ public class AddressServiceImpl implements AddressService {
                 sb.append(oldValue.getKey()).append(':');
                 sb.append(oldValue.getValue()).append("->");
                 sb.append(newValues.get(oldValue.getKey()));
+                sb.append(" & ");
             }
 
         }
@@ -197,6 +206,9 @@ public class AddressServiceImpl implements AddressService {
 
     private void addToMap(String name, Map<String, Object> map,
             TextListProperty categories) {
+        if (categories == null) {
+            return;
+        }
         final List<String> textProperties = categories.getValues();
         Collections.sort(textProperties);
         for (int i = 0; i < textProperties.size(); i++) {
@@ -238,7 +250,7 @@ public class AddressServiceImpl implements AddressService {
 
     private String createDescription(VCard vCard, DateFormat keyDateFormat) {
         final StringBuilder description = new StringBuilder();
-        description.append(vCard.getFormattedName()).append('@');
+        description.append(vCard.getFormattedName().getValue()).append('@');
         for (Categories categories : vCard.getCategoriesList()) {
             description.append('[')
                     .append(StringUtils.join(categories.getValues(), "'"))
