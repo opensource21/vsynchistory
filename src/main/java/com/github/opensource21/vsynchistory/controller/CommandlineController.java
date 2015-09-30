@@ -16,6 +16,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.github.opensource21.vsynchistory.model.DiffResult;
+import com.github.opensource21.vsynchistory.service.api.AddressService;
 import com.github.opensource21.vsynchistory.service.api.CalendarService;
 import com.github.opensource21.vsynchistory.service.api.GitService;
 import com.github.opensource21.vsynchistory.service.api.GitService.ContentTupel;
@@ -29,34 +30,37 @@ import com.github.opensource21.vsynchistory.service.api.GitService.ContentTupel;
 @Component
 public class CommandlineController implements CommandLineRunner {
 
-	private static final String PROPS_FILESUFFIX = ".props";
+    private static final String PROPS_FILESUFFIX = ".props";
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(CommandlineController.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(CommandlineController.class);
 
-	private static final String CALENDAR = "BEGIN:VCALENDAR";
-	private static final String ADDRESS = "BEGIN:VCARD";
+    private static final String CALENDAR = "BEGIN:VCALENDAR";
+    private static final String ADDRESS = "BEGIN:VCARD";
 
-	@Resource
-	private GitService gitService;
+    @Resource
+    private GitService gitService;
 
-	@Resource
-	private CalendarService calendarService;
+    @Resource
+    private CalendarService calendarService;
 
-	@Override
-	public void run(String... args) throws Exception {
-		commitChanges("");
-		final String[] users = { "gunda", "niels" };
-		for (final String user : users) {
-			final String changes = calendarService.archive(user);
-			if (StringUtils.isNotEmpty(changes)) {
-				commitChanges(changes + "\n");
-			}
-		}
+    @Resource
+    private AddressService addressService;
 
-	}
+    @Override
+    public void run(String... args) throws Exception {
+        commitChanges("");
+        final String[] users = { "gunda", "niels" };
+        for (final String user : users) {
+            final String changes = calendarService.archive(user);
+            if (StringUtils.isNotEmpty(changes)) {
+                commitChanges(changes + "\n");
+            }
+        }
 
-	private void commitChanges(String additionalCommitMessage) throws GitAPIException, IOException,
+    }
+
+    private void commitChanges(String additionalCommitMessage) throws GitAPIException, IOException,
 			ParserException {
 		final Set<String> changedFilenames = gitService.getChangedFilenames();
 		for (final String changedFile : changedFilenames) {
@@ -71,7 +75,8 @@ public class CommandlineController implements CommandLineRunner {
 		        gitService.add(changedFile, changedFile + PROPS_FILESUFFIX);
 				diffResult = calendarService.compare(oldContent, changes.getNewContent());
 			} else if (type.startsWith(ADDRESS)) {
-				diffResult = null;
+			    gitService.add(changedFile, changedFile + PROPS_FILESUFFIX);
+			    diffResult = addressService.compare(oldContent, changes.getNewContent());
 			} else {
 				diffResult = null;
 			}
