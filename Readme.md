@@ -19,5 +19,4 @@ The programm is licensed under the AGPL.
 
 ## TODO
 - the archive-calendars are hard-coded.
-- at the moment there is no vcard support.
 - better documentation.
