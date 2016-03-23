@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.github.opensource21.vsynchistory.service.impl;
 
@@ -31,6 +31,7 @@ import ezvcard.property.Address;
 import ezvcard.property.Categories;
 import ezvcard.property.DateOrTimeProperty;
 import ezvcard.property.Email;
+import ezvcard.property.FormattedName;
 import ezvcard.property.Organization;
 import ezvcard.property.StructuredName;
 import ezvcard.property.Telephone;
@@ -95,7 +96,7 @@ public class AddressServiceImpl implements AddressService {
             throws IOException {
         final ParserChainTextReader cardReader = Ezvcard.parse(oldAddressbook);
         final Map<String, VCard> result = new HashMap<>();
-        for (VCard addressCard : cardReader.all()) {
+        for (final VCard addressCard : cardReader.all()) {
             final String key;
             if (addressCard.getUid() == null) {
                 key = createDescription(addressCard, new SimpleDateFormat(DATE_FORMAT_WITH_TIME));
@@ -119,7 +120,7 @@ public class AddressServiceImpl implements AddressService {
 
     private void addChanges(StringBuilder sb, Map<String, Object> oldValues,
             Map<String, Object> newValues) {
-        for (Map.Entry<String, Object> oldValue : oldValues.entrySet()) {
+        for (final Map.Entry<String, Object> oldValue : oldValues.entrySet()) {
             if (!Objects.equals(oldValue.getValue(),
                     newValues.get(oldValue.getKey()))) {
                 sb.append(oldValue.getKey()).append(':');
@@ -160,7 +161,7 @@ public class AddressServiceImpl implements AddressService {
 
     }
 
-    
+
     private void addTelephoneNumbersToMap(Map<String, Object> map,
             List<Telephone> telephoneNumbers) {
         Collections.sort(telephoneNumbers);
@@ -168,7 +169,7 @@ public class AddressServiceImpl implements AddressService {
         for (int i = 0; i < telephoneNumbers.size(); i++) {
             final Telephone telephoneNumber = telephoneNumbers.get(i);
             final List<String> telephoneNrTypes = new ArrayList<>();
-            for (TelephoneType  telephoneType : telephoneNumber.getTypes()) {
+            for (final TelephoneType  telephoneType : telephoneNumber.getTypes()) {
                 telephoneNrTypes.add(telephoneType.getValue());
             }
             Collections.sort(telephoneNrTypes);
@@ -176,7 +177,7 @@ public class AddressServiceImpl implements AddressService {
             map.put("telephoneNumber[" + i + "].value", telephoneNumber.getText());
         }
     }
-    
+
     private void addTitlesToMap(Map<String, Object> map, List<Title> titles) {
         Collections.sort(titles);
         map.put("NrOfTitles", titles.size());
@@ -185,16 +186,16 @@ public class AddressServiceImpl implements AddressService {
             map.put("title[" + i + "].type", title.getType());
             map.put("title[" + i + "].value", title.getValue());
         }
-        
+
     }
-    
+
     private void addEmailsToMap(Map<String, Object> map, List<Email> emails) {
         Collections.sort(emails);
         map.put("NrOfEmails", emails.size());
         for (int i = 0; i < emails.size(); i++) {
             final Email email = emails.get(i);
             final List<String> emailTypes = new ArrayList<>();
-            for (EmailType emailType : email.getTypes()) {
+            for (final EmailType emailType : email.getTypes()) {
                 emailTypes.add(emailType.getValue());
             }
             Collections.sort(emailTypes);
@@ -218,7 +219,7 @@ public class AddressServiceImpl implements AddressService {
 
     private void addToMap(Map<String, Object> map, String name,
             DateOrTimeProperty birthday, DateFormat format) {
-        String value =
+        final String value =
                 birthday == null ? null : format.format(birthday.getDate());
         map.put(name, value);
 
@@ -250,8 +251,15 @@ public class AddressServiceImpl implements AddressService {
 
     private String createDescription(VCard vCard, DateFormat keyDateFormat) {
         final StringBuilder description = new StringBuilder();
-        description.append(vCard.getFormattedName().getValue()).append('@');
-        for (Categories categories : vCard.getCategoriesList()) {
+        final FormattedName formattedName = vCard.getFormattedName();
+        if (formattedName == null) {
+        	description.append(vCard.getStructuredName().getFamily()).append(", ");
+        	description.append(vCard.getStructuredName().getGiven());
+        } else {
+        	description.append(formattedName.getValue());
+        }
+        description.append('@');
+        for (final Categories categories : vCard.getCategoriesList()) {
             description.append('[')
                     .append(StringUtils.join(categories.getValues(), "'"))
                     .append(']');
