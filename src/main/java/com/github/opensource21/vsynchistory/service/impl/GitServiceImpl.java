@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import com.github.opensource21.vsynchistory.service.api.GitService;
 
 /**
- * Everything to handle the git-repo.
+ * Everything to handle the git-repo. See https://github.com/centic9/jgit-cookbook
  *
  * @author niels
  *
@@ -88,7 +88,7 @@ public class GitServiceImpl implements GitService {
 			git.commit().setMessage(commitMessage).call();
 		}
 	}
-	
+
 	@Override
 	public void add(String... filenames) throws GitAPIException {
         try (final Git git = getGit()) {
@@ -98,7 +98,7 @@ public class GitServiceImpl implements GitService {
             }
             addCommand.call();
         }
-	    
+
 	}
 
 	private final Git getGit() {
