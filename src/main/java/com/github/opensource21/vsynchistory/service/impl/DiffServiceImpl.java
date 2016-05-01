@@ -50,7 +50,7 @@ public class DiffServiceImpl implements DiffService {
 	private AddressService addressService;
 
 	@Override
-	public void commitChanges(String additionalCommitMessage, final Set<String> changedFilenames)
+	public synchronized void commitChanges(String additionalCommitMessage, final Set<String> changedFilenames)
 			throws GitAPIException, IOException, ParserException {
 		for (final String changedFile : changedFilenames) {
 			final ContentTupel changes = gitService.getContents(changedFile);

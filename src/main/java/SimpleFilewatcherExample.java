@@ -11,7 +11,7 @@ public class SimpleFilewatcherExample {
     public static void main(String[] args) {
 
         //define a folder root
-        final Path myDir = Paths.get("/tmp");
+        final Path myDir = Paths.get("/tmp/test");
 
         try {
            final WatchService watcher = myDir.getFileSystem().newWatchService();

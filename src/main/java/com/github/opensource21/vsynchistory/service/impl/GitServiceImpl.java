@@ -82,7 +82,7 @@ public class GitServiceImpl implements GitService {
 	}
 
 	@Override
-	public void commit(String commitMessage, String... filenames)
+	public synchronized void commit(String commitMessage, String... filenames)
 			throws GitAPIException {
 		try (final Git git = getGit()) {
 			git.commit().setMessage(commitMessage).call();
@@ -90,7 +90,7 @@ public class GitServiceImpl implements GitService {
 	}
 
 	@Override
-	public void add(String... filenames) throws GitAPIException {
+	public synchronized void add(String... filenames) throws GitAPIException {
         try (final Git git = getGit()) {
             final AddCommand addCommand = git.add();
             for (final String filename : filenames) {
