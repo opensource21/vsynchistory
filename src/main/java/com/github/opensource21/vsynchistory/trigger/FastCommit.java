@@ -3,12 +3,17 @@
  */
 package com.github.opensource21.vsynchistory.trigger;
 
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -57,6 +62,7 @@ public class FastCommit implements InitializingBean  {
 	@Scheduled(initialDelay = 1500, fixedDelayString = "${watch.fixedDelay}")
     public void dailyCommit() throws Exception {
 		if ((System.currentTimeMillis() - lastChange) > silenceTime) {
+			LOG.info("Run-Commit");
 			diffService.commitChanges("", gitService.getChangedFilenames());
 			lastChange = Long.MAX_VALUE;
 		}
@@ -69,13 +75,13 @@ public class FastCommit implements InitializingBean  {
 			final List<WatchEvent<?>> events = watckKey.pollEvents();
 			for (final WatchEvent<?> event : events) {
 				if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
-					LOG.debug("Created: " + event.context().toString());
+					LOG.debug("Created: {} ", event.context());
 				}
 				if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
-					LOG.debug("Delete: " + event.context().toString());
+					LOG.debug("Delete: {}", event.context());
 				}
 				if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-					LOG.debug("Modify: " + event.context().toString());
+					LOG.debug("Modify: {}", event.context());
 				}
 			}
 			lastChange = System.currentTimeMillis();
@@ -89,9 +95,26 @@ public class FastCommit implements InitializingBean  {
 	public void afterPropertiesSet() throws Exception {
 		final Path repoDir = Paths.get(repositoryLocation);
 		watcher = repoDir.getFileSystem().newWatchService();
-		repoDir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE,
-				StandardWatchEventKinds.ENTRY_DELETE,
-				StandardWatchEventKinds.ENTRY_MODIFY);
+		registerAll(repoDir);
 
 	}
+
+    /**
+     * Register the given directory, and all its sub-directories, with the
+     * WatchService.
+     */
+    private void registerAll(final Path start) throws IOException {
+        // register directory and sub-directories
+        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                throws IOException
+            {
+            	dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE,
+        				StandardWatchEventKinds.ENTRY_DELETE,
+        				StandardWatchEventKinds.ENTRY_MODIFY);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
 }
