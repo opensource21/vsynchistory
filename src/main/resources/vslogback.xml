@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <contextName>vsync</contextName>
+    <jmxConfigurator />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+
+        <!-- encoders are assigned by default the type ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+        <encoder>
+            <pattern>
+                %d [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/vsync.log</file>
+        <append>true</append>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover-->
+            <fileNamePattern>logs/vsync.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- or whenever the file size reaches 500MB -->
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- keep 30 days' worth of history-->
+            <maxHistory>30</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+
+
+        <!-- encoders are assigned by default the type ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+        <encoder>
+            <pattern>
+                %d [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    <!-- Application Loggers -->
+
+    <!-- 3rdparty Loggers -->
+    <logger name="org.springframework.core" level="WARN" />
+
+    <logger name="org.springframework.beans" level="WARN" />
+
+    <logger name="org.springframework.aop" level="WARN" />
+
+    <logger name="org.springframework.context" level="WARN" />
+
+    <logger name="org.springframework.orm" level="WARN" />
+
+    <logger name="org.springframework.web" level="WARN" />
+
+    <logger name="org.springframework.data" level="WARN" />
+
+    <!-- Auf TRACE setzen bei 400 -Fehlern -->
+    <logger name="org.springframework.web.servlet.mvc.method.annotation" level="WARN"/>
+
+    <logger name="org.springframework" level="WARN" />
+
+    <logger name="org.thymeleaf" level="WARN"/>
+
+
+    <root level="INFO">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>
