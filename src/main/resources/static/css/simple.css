@@ -1,0 +1,6 @@
+td {
+    vertical-align: top;
+}
+tbody tr:nth-child(odd) {
+   background-color: #e6e6ff;
+}

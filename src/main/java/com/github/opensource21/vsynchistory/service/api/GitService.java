@@ -1,10 +1,13 @@
 package com.github.opensource21.vsynchistory.service.api;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
+
+import com.github.opensource21.vsynchistory.model.LogMessage;
+import com.github.opensource21.vsynchistory.model.ContentTupel;
 
 public interface GitService {
 
@@ -38,45 +41,12 @@ public interface GitService {
      */
     void add(String... filenames) throws  GitAPIException;
 
-	
-	/**
-	 * A tupel of contents.
-	 * @author niels
-	 *
-	 */
-	class ContentTupel {
-		private final InputStream oldContent;
-		private final InputStream newContent;
 
-		/**
-		 * Create a tupel of old and new content.
-		 * @param oldContent the old content.
-		 * @param newContent the new content.
-		 */
-		public ContentTupel(InputStream oldContent, InputStream newContent) {
-			super();
-			this.oldContent = oldContent;
-			this.newContent = newContent;
-		}
-
-		/**
-		 * Returns the old content.
-		 * @return the old content.
-		 */
-		public InputStream getOldContent() {
-			return oldContent;
-		}
-
-
-		/**
-		 * Returns the new content.
-		 * @return the new content.
-		 */
-		public InputStream getNewContent() {
-			return newContent;
-		}
-
-
-	}
+    /**
+     * List all log messages.
+     * @return all log messages.
+     * @throws GitAPIException
+     */
+    List<LogMessage> getLogMessages() throws  GitAPIException;
 
 }

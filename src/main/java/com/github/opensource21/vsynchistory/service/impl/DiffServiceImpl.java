@@ -16,13 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.github.opensource21.vsynchistory.controller.CommandlineController;
+import com.github.opensource21.vsynchistory.model.ContentTupel;
 import com.github.opensource21.vsynchistory.model.DiffResult;
 import com.github.opensource21.vsynchistory.service.api.AddressService;
 import com.github.opensource21.vsynchistory.service.api.CalendarService;
 import com.github.opensource21.vsynchistory.service.api.DiffService;
 import com.github.opensource21.vsynchistory.service.api.GitService;
-import com.github.opensource21.vsynchistory.service.api.GitService.ContentTupel;
 
 /**
  * Default-Implementierung of {@link DiffService}.
@@ -34,7 +33,7 @@ import com.github.opensource21.vsynchistory.service.api.GitService.ContentTupel;
 public class DiffServiceImpl implements DiffService {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(CommandlineController.class);
+			.getLogger(DiffServiceImpl.class);
 
 	private static final String PROPS_FILESUFFIX = ".props";
 	private static final String CALENDAR = "BEGIN:VCALENDAR";

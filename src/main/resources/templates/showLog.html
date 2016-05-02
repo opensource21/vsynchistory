@@ -1,0 +1,25 @@
+<html lang="de-DE" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../static/css/simple.css"
+    th:href="@{/css/simple.css}" />
+</head>
+<body>
+    Git-Log
+    <table>
+    	<thead>
+    		<tr>
+    			<th>Datum</th>
+    			<th>Änderungen</th>
+    		</tr>
+    	</thead>
+    	<tbody>
+    		<tr th:each="logmessage : ${logmessages}" >
+    			<td th:text="${#dates.format(logmessage.commitDate, 'dd.mm.yyyy HH:MM:SS')}"></td>
+    			<td th:utext="${logmessage.commitMessage.replaceAll('\n','&lt;br&gt;')}"></td>
+    		</tr>
+    	</tbody>
+    </table>
+</body>
+</html>

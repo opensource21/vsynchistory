@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jgit.api.AddCommand;
@@ -25,6 +28,8 @@ import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.github.opensource21.vsynchistory.model.ContentTupel;
+import com.github.opensource21.vsynchistory.model.LogMessage;
 import com.github.opensource21.vsynchistory.service.api.GitService;
 
 /**
@@ -128,6 +133,19 @@ public class GitServiceImpl implements GitService {
 					+ repoDir.getAbsolutePath() + " could not be accessed.",
 					ioE);
 		}
+	}
+
+	@Override
+	public List<LogMessage> getLogMessages() throws GitAPIException {
+		final List<LogMessage> result = new ArrayList<LogMessage>();
+		try (Git git = getGit()) {
+            final Iterable<RevCommit> logs = git.log().call();
+            for (final RevCommit rev : logs) {
+            	final Date commitDate = new Date(rev.getCommitTime() * 1000L);
+            	result.add(new LogMessage(commitDate, rev.getFullMessage()));
+            }
+		}
+		return result;
 	}
 
 }
