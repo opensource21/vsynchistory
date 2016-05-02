@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import com.github.opensource21.vsynchistory.service.api.CalendarService;
 import com.github.opensource21.vsynchistory.service.api.DiffService;
@@ -17,6 +18,7 @@ import com.github.opensource21.vsynchistory.service.api.GitService;
  * @author niels
  *
  */
+@Component
 public class DailyCommit {
 
 	@Resource
