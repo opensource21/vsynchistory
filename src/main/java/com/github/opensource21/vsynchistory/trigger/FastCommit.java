@@ -38,7 +38,7 @@ import com.github.opensource21.vsynchistory.service.api.GitService;
 @Component
 public class FastCommit implements InitializingBean {
 
-    private static Logger LOG = LoggerFactory.getLogger(DailyCommit.class);
+    private static Logger LOG = LoggerFactory.getLogger(FastCommit.class);
 
     @Resource
     private GitService gitService;
@@ -64,7 +64,7 @@ public class FastCommit implements InitializingBean {
 
         final long currentTimeMillis = System.currentTimeMillis();
         final long timeSinceLastChange = currentTimeMillis - lastChange;
-        LOG.debug(
+        LOG.trace(
                 "Currenttime: {}, lastChange{}, timeSinceLastChange: {}, silenceTime: {}",
                 currentTimeMillis, lastChange, timeSinceLastChange, silenceTime);
         if (timeSinceLastChange > silenceTime) {
