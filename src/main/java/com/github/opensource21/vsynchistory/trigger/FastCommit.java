@@ -115,9 +115,14 @@ public class FastCommit implements InitializingBean {
             @Override
             public FileVisitResult preVisitDirectory(Path dir,
                     BasicFileAttributes attrs) throws IOException {
+                if (dir.toString().endsWith(".git")) {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
+                LOG.debug("Register directory {}.", dir.toAbsolutePath());
                 dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE,
                         StandardWatchEventKinds.ENTRY_DELETE,
                         StandardWatchEventKinds.ENTRY_MODIFY);
+
                 return FileVisitResult.CONTINUE;
             }
         });
