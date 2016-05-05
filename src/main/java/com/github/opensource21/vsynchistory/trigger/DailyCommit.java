@@ -15,13 +15,14 @@ import com.github.opensource21.vsynchistory.service.api.GitService;
 
 /**
  * Job which ensures, that at least daily a commit happens and the archive runs.
+ * 
  * @author niels
  *
  */
 @Component
 public class DailyCommit {
 
-	@Resource
+    @Resource
     private GitService gitService;
 
     @Resource
@@ -32,12 +33,12 @@ public class DailyCommit {
 
     @Scheduled(cron = "${cron.dailyCommit}")
     public void dailyCommit() throws Exception {
-    	diffService.commitChanges("", gitService.getChangedFilenames());
+        diffService.commitChanges("", gitService.getChangedFilenames());
         final String[] users = { "gunda", "niels" };
         for (final String user : users) {
             final String changes = calendarService.archive(user);
             if (StringUtils.isNotEmpty(changes)) {
-            	diffService.commitChanges(changes + "\n", gitService.getChangedFilenames());
+                diffService.commitChanges(changes + "\n", gitService.getChangedFilenames());
             }
         }
     }

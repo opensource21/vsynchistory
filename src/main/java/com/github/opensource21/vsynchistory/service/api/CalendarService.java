@@ -10,8 +10,8 @@ import com.github.opensource21.vsynchistory.model.DiffResult;
 
 public interface CalendarService {
 
-	DiffResult compare(InputStream oldCalendar, InputStream newCalendar) throws IOException, ParserException;
+    DiffResult compare(InputStream oldCalendar, InputStream newCalendar) throws IOException, ParserException;
 
-	String archive(String user) throws IOException, ParserException, ValidationException;
+    String archive(String user) throws IOException, ParserException, ValidationException;
 
 }

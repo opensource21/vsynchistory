@@ -34,6 +34,4 @@ public class ServletInitializer extends SpringBootServletInitializer {
         super.onStartup(servletContext);
     }
 
-
-
 }

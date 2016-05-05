@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Konfiguration für das Sceduling
+ * 
  * @author niels
  *
  */

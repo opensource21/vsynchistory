@@ -15,21 +15,20 @@ import com.github.opensource21.vsynchistory.service.api.GitService;
 
 /**
  * Controller welcher das Git-Log anzeigt.
+ * 
  * @author niels
  *
  */
 @Controller
 public class ShowLogController {
 
-	@Resource
-	private GitService gitService;
+    @Resource
+    private GitService gitService;
 
-
-	@RequestMapping(value = {"/", "showLog"}, method = RequestMethod.GET)
-	public String showlog(Model model) throws GitAPIException {
-		model.addAttribute("logmessages", gitService.getLogMessages());
-		return "showLog";
-	}
-
+    @RequestMapping(value = { "/", "showLog" }, method = RequestMethod.GET)
+    public String showlog(Model model) throws GitAPIException {
+        model.addAttribute("logmessages", gitService.getLogMessages());
+        return "showLog";
+    }
 
 }

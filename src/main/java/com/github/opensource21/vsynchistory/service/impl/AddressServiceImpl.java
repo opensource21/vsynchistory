@@ -146,10 +146,6 @@ public class AddressServiceImpl implements AddressService {
         addTitlesToMap(map, address.getTitles());
     }
 
-
-
-
-
     private void addOrganistationsToMap(Map<String, Object> map,
             List<Organization> organizations) {
         Collections.sort(organizations);
@@ -161,7 +157,6 @@ public class AddressServiceImpl implements AddressService {
 
     }
 
-
     private void addTelephoneNumbersToMap(Map<String, Object> map,
             List<Telephone> telephoneNumbers) {
         Collections.sort(telephoneNumbers);
@@ -169,7 +164,7 @@ public class AddressServiceImpl implements AddressService {
         for (int i = 0; i < telephoneNumbers.size(); i++) {
             final Telephone telephoneNumber = telephoneNumbers.get(i);
             final List<String> telephoneNrTypes = new ArrayList<>();
-            for (final TelephoneType  telephoneType : telephoneNumber.getTypes()) {
+            for (final TelephoneType telephoneType : telephoneNumber.getTypes()) {
                 telephoneNrTypes.add(telephoneType.getValue());
             }
             Collections.sort(telephoneNrTypes);
@@ -253,10 +248,10 @@ public class AddressServiceImpl implements AddressService {
         final StringBuilder description = new StringBuilder();
         final FormattedName formattedName = vCard.getFormattedName();
         if (formattedName == null) {
-        	description.append(vCard.getStructuredName().getFamily()).append(", ");
-        	description.append(vCard.getStructuredName().getGiven());
+            description.append(vCard.getStructuredName().getFamily()).append(", ");
+            description.append(vCard.getStructuredName().getGiven());
         } else {
-        	description.append(formattedName.getValue());
+            description.append(formattedName.getValue());
         }
         description.append('@');
         for (final Categories categories : vCard.getCategoriesList()) {

@@ -7,7 +7,6 @@ import com.github.opensource21.vsynchistory.model.DiffResult;
 
 public interface AddressService {
 
-	DiffResult compare(InputStream oldAdressbook, InputStream newAdressbook) throws IOException;
-
+    DiffResult compare(InputStream oldAdressbook, InputStream newAdressbook) throws IOException;
 
 }
