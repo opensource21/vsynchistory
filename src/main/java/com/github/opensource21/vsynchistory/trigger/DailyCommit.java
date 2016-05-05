@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -35,11 +36,18 @@ public class DailyCommit {
     @Resource
     private DiffService diffService;
 
+    @Value(value="${archive.user}")
+    private String usersAsString;
+
     @Scheduled(cron = "${cron.dailyCommit}")
     public void dailyCommit() throws Exception {
         LOG.info("Running daily commit.");
         diffService.commitChanges("", gitService.getChangedFilenames());
-        final String[] users = { "gunda", "niels" };
+        if (StringUtils.isEmpty(usersAsString)) {
+            LOG.debug("Keine Archiv user mit archive.user angegeben.");
+            return;
+        }
+        final String[] users = usersAsString.trim().split("[ ,]+");
         for (final String user : users) {
             LOG.debug("Archiviere Kalender für {}.", user);
             final String changes = calendarService.archive(user);
