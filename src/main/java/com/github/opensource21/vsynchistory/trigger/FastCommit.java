@@ -69,8 +69,8 @@ public class FastCommit implements InitializingBean {
                 currentTimeMillis, lastChange, timeSinceLastChange, silenceTime);
         if (timeSinceLastChange > silenceTime) {
             LOG.info("Run-Commit");
-            diffService.commitChanges("", gitService.getChangedFilenames());
             lastChange = Long.MAX_VALUE;
+            diffService.commitChanges("", gitService.getChangedFilenames());
         }
     }
 
