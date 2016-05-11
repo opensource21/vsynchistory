@@ -16,7 +16,7 @@
     	</thead>
     	<tbody>
     		<tr th:each="logmessage : ${logmessages}" >
-    			<td th:text="${#dates.format(logmessage.commitDate, 'dd.mm.yyyy HH:MM:SS')}"></td>
+    			<td th:text="${#dates.format(logmessage.commitDate, 'dd.MM.yyyy HH:mm:SS')}"></td>
     			<td th:utext="${logmessage.commitMessage.replaceAll('\n','&lt;br&gt;')}"></td>
     		</tr>
     	</tbody>
