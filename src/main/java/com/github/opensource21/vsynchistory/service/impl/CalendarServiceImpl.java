@@ -57,7 +57,7 @@ public class CalendarServiceImpl implements CalendarService {
         final File repoDir = new File(repositoryLocation);
         Date lastModifiedLimit =
                 DateUtils.truncate(new Date(), java.util.Calendar.YEAR);
-        lastModifiedLimit = DateUtils.addMonths(lastModifiedLimit, -6);
+        lastModifiedLimit = DateUtils.addMonths(lastModifiedLimit, -13);
         int moved = 0;
         final File currentFile = new File(repoDir, "volatil/" + user);
         final File archiveFile =
