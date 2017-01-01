@@ -62,7 +62,7 @@ public class DiffServiceImpl implements DiffService {
             final DiffResult diffResult;
             if (CALENDAR.equals(type)) {
                 gitService.add(changedFile, changedFile + PROPS_FILESUFFIX);
-                diffResult = calendarService.compare(oldContent, changes.getNewContent());
+                diffResult = calendarService.compare(oldContent, changes.getNewContent(), changedFile);
             } else if (type.startsWith(ADDRESS)) {
                 gitService.add(changedFile, changedFile + PROPS_FILESUFFIX);
                 diffResult = addressService.compare(oldContent, changes.getNewContent());

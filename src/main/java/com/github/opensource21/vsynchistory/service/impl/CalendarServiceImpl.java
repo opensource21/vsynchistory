@@ -16,6 +16,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.github.opensource21.vsynchistory.model.DiffResult;
+import com.github.opensource21.vsynchistory.service.api.CalendarService;
+
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
@@ -28,14 +38,6 @@ import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateProperty;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import com.github.opensource21.vsynchistory.model.DiffResult;
-import com.github.opensource21.vsynchistory.service.api.CalendarService;
-
 /**
  * @author niels
  *
@@ -43,6 +45,8 @@ import com.github.opensource21.vsynchistory.service.api.CalendarService;
 @Service
 public class CalendarServiceImpl implements CalendarService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CalendarServiceImpl.class);
+    
     @Value(value = "${repositoryLocation}")
     private String repositoryLocation;
 
@@ -96,10 +100,10 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public DiffResult compare(InputStream oldCalendar, InputStream newCalendar)
+    public DiffResult compare(InputStream oldCalendar, InputStream newCalendar, String changedFilename)
             throws IOException, ParserException {
-        final Map<String, VEvent> oldEntries = parseCalendar(oldCalendar);
-        final Map<String, VEvent> newEntries = parseCalendar(newCalendar);
+        final Map<String, VEvent> oldEntries = parseCalendar(oldCalendar, changedFilename);
+        final Map<String, VEvent> newEntries = parseCalendar(newCalendar, changedFilename);
         final Set<String> deletedIds =
                 getValuesOnlyInFirst(oldEntries, newEntries);
         final Set<String> newIds = getValuesOnlyInFirst(newEntries, oldEntries);
@@ -152,7 +156,7 @@ public class CalendarServiceImpl implements CalendarService {
         return onlyFirstEntriesUid;
     }
 
-    private Map<String, VEvent> parseCalendar(InputStream calendarInput)
+    private Map<String, VEvent> parseCalendar(InputStream calendarInput, String changedFilename)
             throws IOException, ParserException {
         final CalendarBuilder builder = new CalendarBuilder();
         final Calendar calendar = builder.build(calendarInput);
@@ -162,8 +166,12 @@ public class CalendarServiceImpl implements CalendarService {
         final Map<String, VEvent> allEvents = new HashMap<>();
         for (final Object eventObj : allEntries) {
             final VEvent event = (VEvent) eventObj;
-            allEvents.put(event.getUid().getValue(), event);
-
+            final String uidOfEvent = event.getUid().getValue();
+            if (allEvents.containsKey(uidOfEvent)) {
+                LOG.error("Duplicate UID {} in {}.", uidOfEvent, changedFilename);
+                
+            }
+            allEvents.put(uidOfEvent, event);
         }
         return allEvents;
     }
