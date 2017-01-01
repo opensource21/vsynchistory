@@ -164,14 +164,21 @@ public class CalendarServiceImpl implements CalendarService {
         final ComponentList allEntries =
                 calendar.getComponents(Component.VEVENT);
         final Map<String, VEvent> allEvents = new HashMap<>();
+        final DateFormat keyDateFormat =
+                new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         for (final Object eventObj : allEntries) {
             final VEvent event = (VEvent) eventObj;
-            final String uidOfEvent = event.getUid().getValue();
-            if (allEvents.containsKey(uidOfEvent)) {
-                LOG.error("Duplicate UID {} in {}.", uidOfEvent, changedFilename);
-                
+            String uidOfEvent = event.getUid().getValue();
+            if (event.getRecurrenceId() != null && StringUtils.isNotEmpty(event.getRecurrenceId().getValue())) {
+                uidOfEvent = uidOfEvent + event.getRecurrenceId().getValue();
             }
-            allEvents.put(uidOfEvent, event);
+            
+            if (allEvents.containsKey(uidOfEvent)) {
+                LOG.error("Duplicate UID {} in {} for {}.", uidOfEvent, changedFilename, 
+                        createDescription(event, keyDateFormat));
+            } else {
+                allEvents.put(uidOfEvent, event);
+            }
         }
         return allEvents;
     }

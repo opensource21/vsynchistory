@@ -60,7 +60,7 @@ public class FastCommit implements InitializingBean {
     private long silenceTime;
 
     @Scheduled(initialDelay = 1500, fixedDelayString = "${watch.fixedDelay}")
-    public void dailyCommit() throws Exception {
+    public void fastCommit() throws Exception {
 
         final long currentTimeMillis = System.currentTimeMillis();
         final long timeSinceLastChange = currentTimeMillis - lastChange;
