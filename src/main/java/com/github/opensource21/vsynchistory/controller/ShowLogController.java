@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -27,7 +28,18 @@ public class ShowLogController {
 
     @RequestMapping(value = { "/", "showLog" }, method = RequestMethod.GET)
     public String showlog(Model model) throws GitAPIException {
-        model.addAttribute("logmessages", gitService.getLogMessages(100));
+        return "redirect:showLog/100";
+    }
+    
+    @RequestMapping(value = {"showLog/{nrOfEntries}"}, method = RequestMethod.GET)
+    public String showlog(Model model, @PathVariable(value="nrOfEntries") long nrOfEntries) throws GitAPIException {
+        model.addAttribute("logmessages", gitService.getLogMessages(nrOfEntries));
+        return "showLog";
+    }
+
+    @RequestMapping(value = {"showCompleteLog"}, method = RequestMethod.GET)
+    public String showCompletelog(Model model) throws GitAPIException {
+        model.addAttribute("logmessages", gitService.getLogMessages(Long.MAX_VALUE));
         return "showLog";
     }
 
