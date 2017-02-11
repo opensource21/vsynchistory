@@ -48,7 +48,7 @@ public class GitServiceImpl implements GitService {
     @Override
     public Set<String> getChangedFilenames() throws NoWorkTreeException,
             GitAPIException {
-        final Set<String> result = new HashSet<String>();
+        final Set<String> result = new HashSet<>();
         try (final Git git = getGit()) {
             final Status status = git.status().call();
             result.addAll(status.getChanged());
@@ -139,13 +139,16 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public List<LogMessage> getLogMessages() throws GitAPIException {
-        final List<LogMessage> result = new ArrayList<LogMessage>();
+    public List<LogMessage> getLogMessages(long maxNrOfEntries) throws GitAPIException {
+        final List<LogMessage> result = new ArrayList<>();
         try (Git git = getGit()) {
             final Iterable<RevCommit> logs = git.log().call();
             for (final RevCommit rev : logs) {
                 final Date commitDate = new Date(rev.getCommitTime() * 1000L);
                 result.add(new LogMessage(commitDate, rev.getFullMessage()));
+                if (result.size() >= maxNrOfEntries) {
+                    return result;
+                }
             }
         }
         return result;

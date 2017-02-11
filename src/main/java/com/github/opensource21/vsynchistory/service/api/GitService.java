@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 
-import com.github.opensource21.vsynchistory.model.LogMessage;
 import com.github.opensource21.vsynchistory.model.ContentTupel;
+import com.github.opensource21.vsynchistory.model.LogMessage;
 
 public interface GitService {
 
@@ -48,9 +48,10 @@ public interface GitService {
     /**
      * List all log messages.
      * 
+     * @param maxNrOfEntries maximale Anzahl an Einträgen. 
      * @return all log messages.
      * @throws GitAPIException
      */
-    List<LogMessage> getLogMessages() throws GitAPIException;
+    List<LogMessage> getLogMessages(long maxNrOfEntries) throws GitAPIException;
 
 }

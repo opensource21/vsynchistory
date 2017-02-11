@@ -27,7 +27,7 @@ public class ShowLogController {
 
     @RequestMapping(value = { "/", "showLog" }, method = RequestMethod.GET)
     public String showlog(Model model) throws GitAPIException {
-        model.addAttribute("logmessages", gitService.getLogMessages());
+        model.addAttribute("logmessages", gitService.getLogMessages(100));
         return "showLog";
     }
 
