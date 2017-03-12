@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.github.opensource21.vsynchistory.model.DiffResult;
+import com.github.opensource21.vsynchistory.model.HolidayEvent;
 import com.github.opensource21.vsynchistory.service.api.CalendarService;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
@@ -49,7 +50,7 @@ public class CalendarServiceImpl implements CalendarService {
     
     @Value(value = "${repositoryLocation}")
     private String repositoryLocation;
-
+    
     @Override
     public String archive(String user) throws IOException, ParserException,
             ValidationException {
@@ -277,6 +278,57 @@ public class CalendarServiceImpl implements CalendarService {
             return null;
         }
         return content.getDate();
+    }
+
+    @Override
+    public String addHolydays(String user, Set<HolidayEvent> holidaysSet)
+            throws IOException, ParserException, ValidationException {
+        final StringBuilder sb = new StringBuilder("Holidays: ");
+        final Map<Date, HolidayEvent> holydayMap = new HashMap<>();
+        for (final HolidayEvent holiday : holidaysSet) {
+            holydayMap.put(holiday.getDate(), holiday);
+        }
+        final String newLine = System.getProperty("line.separator");
+        final File repoDir = new File(repositoryLocation);
+        final File currentFile = new File(repoDir, "volatil/" + user);
+        final CalendarBuilder builder = new CalendarBuilder();
+        final Calendar currentCalendar =
+                builder.build(new FileInputStream(currentFile));
+        final ComponentList allCurrentEntries =
+                currentCalendar.getComponents(Component.VEVENT);
+        
+        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        for (final Object eventObj : allCurrentEntries) {
+            final VEvent event = (VEvent) eventObj;
+            final Date startDate = getDate(event.getStartDate());
+            
+            final boolean eventCreateByThisMethod = event.getUid().getValue().
+                    startsWith(HolidayEvent.UidStartString);
+            final boolean seemsToBeTheSameEvent = holydayMap.containsKey(startDate) 
+                    && holydayMap.get(startDate).getDescription().equals(event.getSummary());
+            if (eventCreateByThisMethod || seemsToBeTheSameEvent) {
+                if (holydayMap.containsKey(startDate)) {
+                    holydayMap.remove(startDate);
+                } else {
+                    currentCalendar.getComponents().remove(event);
+                    sb.append(" remove ").append(formatter.format(startDate));
+                    sb.append(" - ").append(event.getSummary()).append(newLine);
+                }
+            }            
+        }
+        
+        for (final HolidayEvent newHoliday : holydayMap.values()) {
+            sb.append(" add ").append(formatter.format(newHoliday.getDate()));
+            sb.append(" - ").append(newHoliday.getDescription()).append(newLine);
+            
+            final VEvent newEvent = new VEvent(
+                    new net.fortuna.ical4j.model.Date(newHoliday.getDate()), 
+                    newHoliday.getDescription());
+            newEvent.getProperties().add(newHoliday.getUid());
+            currentCalendar.getComponents().add(newEvent);
+        }
+        
+        return sb.toString();
     }
 
 }
