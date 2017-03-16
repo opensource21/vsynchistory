@@ -35,13 +35,13 @@ public interface CalendarService {
     
     /**
      * Add holyday to the calendar.
-     * @param user the user which calendar should be archived.
+     * @param calendarFile the name of the calendar file, where the holiday should be imported.
      * @param holidays the set of holidays.
-     * @return information about move or null if nothing happends
+     * @return information about move or null if nothing happens
      * @throws IOException if there was a problem to read or write the file.
      * @throws ParserException if there was a problem to parse the file.
      * @throws ValidationException the new calendar isn't valid.
      */
-    String addHolydays(String user, Set<HolidayEvent> holidays) throws IOException, ParserException, ValidationException;
+    String addHolydays(String calendarFile, Set<HolidayEvent> holidays) throws IOException, ParserException, ValidationException;
 
 }

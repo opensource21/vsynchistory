@@ -281,7 +281,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public String addHolydays(String user, Set<HolidayEvent> holidaysSet)
+    public String addHolydays(String calendarFile, Set<HolidayEvent> holidaysSet)
             throws IOException, ParserException, ValidationException {
         final StringBuilder sb = new StringBuilder("Holidays: ");
         final Map<Date, HolidayEvent> holydayMap = new HashMap<>();
@@ -290,7 +290,7 @@ public class CalendarServiceImpl implements CalendarService {
         }
         final String newLine = System.getProperty("line.separator");
         final File repoDir = new File(repositoryLocation);
-        final File currentFile = new File(repoDir, "volatil/" + user);
+        final File currentFile = new File(repoDir, calendarFile);
         final CalendarBuilder builder = new CalendarBuilder();
         final Calendar currentCalendar =
                 builder.build(new FileInputStream(currentFile));
