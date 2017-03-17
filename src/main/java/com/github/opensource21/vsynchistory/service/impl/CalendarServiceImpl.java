@@ -93,13 +93,13 @@ public class CalendarServiceImpl implements CalendarService {
                 moved++;
             }
         }
-        final CalendarOutputter outputter = new CalendarOutputter(false);
-        outputter.output(currentCalendar, new FileOutputStream(currentFile));
-        outputter.output(archiveCalendar, new FileOutputStream(archiveFile));
         if (moved > 0) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Move for ").append(user).append(' ').append(moved)
                     .append(" Entries.");
+            final CalendarOutputter outputter = new CalendarOutputter(false);
+            outputter.output(currentCalendar, new FileOutputStream(currentFile));
+            outputter.output(archiveCalendar, new FileOutputStream(archiveFile));
             return sb.toString();
         } else {
             return null;
