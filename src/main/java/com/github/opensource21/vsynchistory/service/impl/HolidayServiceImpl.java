@@ -42,7 +42,7 @@ public class HolidayServiceImpl implements HolidayService {
         final Set<HolidayEvent> result = new HashSet<>();
         for (final Holiday holiday : hls) {
             final HolidayEvent holidayEvent = new HolidayEvent(
-                    Date.from(holiday.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                    Date.from(holiday.getDate().atStartOfDay(ZoneId.of("UTC")).toInstant()),
                     holiday.getDescription(Locale.GERMANY));
             result.add(holidayEvent);
         }
