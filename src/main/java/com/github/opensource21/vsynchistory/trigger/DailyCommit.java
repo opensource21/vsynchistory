@@ -62,7 +62,7 @@ public class DailyCommit {
     private int endYear;
     
     @Value(value = "${holidays.bundesland}")
-    private int bundesland;
+    private String bundesland;
     
     @Scheduled(cron = "${cron.dailyCommit}")
     public void dailyCommit() throws Exception {
@@ -90,7 +90,7 @@ public class DailyCommit {
             LOG.debug("Importiere Feiertage in Kalender {}.", calendar);
             final String changes = calendarService.addHolydays(calendar, holidays);
             if (StringUtils.isNotEmpty(changes)) {
-                LOG.warn("Feiertage import für Kalender {}.", calendar);
+                LOG.warn("Feiertage importiert für Kalender {}.", calendar);
                 diffService.commitChanges(changes + "\n",
                         gitService.getChangedFilenames());
             }

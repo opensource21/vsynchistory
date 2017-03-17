@@ -10,9 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +41,7 @@ import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.Uid;
 
 /**
  * @author niels
@@ -50,6 +54,8 @@ public class CalendarServiceImpl implements CalendarService {
     
     @Value(value = "${repositoryLocation}")
     private String repositoryLocation;
+
+    final String newLine = System.getProperty("line.separator");
     
     @Override
     public String archive(String user) throws IOException, ParserException,
@@ -119,7 +125,7 @@ public class CalendarServiceImpl implements CalendarService {
         for (final String vEventId : deletedIds) {
             message.append("DELETED: ")
                     .append(createDescription(oldEntries.get(vEventId),
-                            keyDateFormat)).append("\n");
+                            keyDateFormat)).append(newLine);
         }
         int nrOfChangedEvents = 0;
         for (final String vEventId : possibleChangedIds) {
@@ -130,18 +136,18 @@ public class CalendarServiceImpl implements CalendarService {
                 nrOfChangedEvents++;
                 message.append("CHANGED - FROM: ")
                         .append(createDescription(oldEvent, keyDateFormat))
-                        .append("\n");
+                        .append(newLine);
                 message.append("CHANGED -  TO : ")
                         .append(createDescription(newEvent, keyDateFormat))
-                        .append("\n");
-                message.append(change).append("\n");
+                        .append(newLine);
+                message.append(change).append(newLine);
             }
 
         }
         for (final String vEventId : newIds) {
             message.append("NEW: ")
                     .append(createDescription(newEntries.get(vEventId),
-                            keyDateFormat)).append("\n");
+                            keyDateFormat)).append(newLine);
         }
         return new DiffResult(deletedIds.size(), newIds.size(),
                 nrOfChangedEvents, message.toString());
@@ -283,12 +289,12 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public String addHolydays(String calendarFile, Set<HolidayEvent> holidaysSet)
             throws IOException, ParserException, ValidationException {
-        final StringBuilder sb = new StringBuilder("Holidays: ");
         final Map<Date, HolidayEvent> holydayMap = new HashMap<>();
         for (final HolidayEvent holiday : holidaysSet) {
             holydayMap.put(holiday.getDate(), holiday);
         }
-        final String newLine = System.getProperty("line.separator");
+        int added = 0;
+        int removed = 0;
         final File repoDir = new File(repositoryLocation);
         final File currentFile = new File(repoDir, calendarFile);
         final CalendarBuilder builder = new CalendarBuilder();
@@ -297,7 +303,6 @@ public class CalendarServiceImpl implements CalendarService {
         final ComponentList allCurrentEntries =
                 currentCalendar.getComponents(Component.VEVENT);
         
-        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         for (final Object eventObj : allCurrentEntries) {
             final VEvent event = (VEvent) eventObj;
             final Date startDate = getDate(event.getStartDate());
@@ -311,24 +316,28 @@ public class CalendarServiceImpl implements CalendarService {
                     holydayMap.remove(startDate);
                 } else {
                     currentCalendar.getComponents().remove(event);
-                    sb.append(" remove ").append(formatter.format(startDate));
-                    sb.append(" - ").append(event.getSummary()).append(newLine);
+                    removed++;
                 }
             }            
         }
-        
-        for (final HolidayEvent newHoliday : holydayMap.values()) {
-            sb.append(" add ").append(formatter.format(newHoliday.getDate()));
-            sb.append(" - ").append(newHoliday.getDescription()).append(newLine);
-            
+        final List<HolidayEvent> newHolidays = new ArrayList<>(holydayMap.values());
+        Collections.sort(newHolidays);
+        for (final HolidayEvent newHoliday : newHolidays) {
             final VEvent newEvent = new VEvent(
                     new net.fortuna.ical4j.model.Date(newHoliday.getDate()), 
                     newHoliday.getDescription());
-            newEvent.getProperties().add(newHoliday.getUid());
+            newEvent.getProperties().add(new Uid(newHoliday.getUid()));
             currentCalendar.getComponents().add(newEvent);
+            added++;
         }
         
-        return sb.toString();
+        if (removed > 0 || added > 0) {
+            final CalendarOutputter outputter = new CalendarOutputter(false);
+            outputter.output(currentCalendar, new FileOutputStream(currentFile));
+            return "Feiertage eingespielt (added:" + added + "removed: " + removed +")";
+        } else {
+            return null;
+        }
     }
 
 }
