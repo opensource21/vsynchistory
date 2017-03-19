@@ -291,7 +291,7 @@ public class CalendarServiceImpl implements CalendarService {
             throws IOException, ParserException, ValidationException {
         final Map<Date, HolidayEvent> holydayMap = new HashMap<>();
         for (final HolidayEvent holiday : holidaysSet) {
-            holydayMap.put(holiday.getDate(), holiday);
+            holydayMap.put(new net.fortuna.ical4j.model.Date(holiday.getDate()), holiday);
         }
         int added = 0;
         int removed = 0;
@@ -310,7 +310,7 @@ public class CalendarServiceImpl implements CalendarService {
             final boolean eventCreateByThisMethod = event.getUid().getValue().
                     startsWith(HolidayEvent.UidStartString);
             final boolean seemsToBeTheSameEvent = holydayMap.containsKey(startDate) 
-                    && holydayMap.get(startDate).getDescription().equals(event.getSummary());
+                    && holydayMap.get(startDate).getDescription().equals(event.getSummary().getValue());
             if (eventCreateByThisMethod || seemsToBeTheSameEvent) {
                 if (holydayMap.containsKey(startDate)) {
                     holydayMap.remove(startDate);
