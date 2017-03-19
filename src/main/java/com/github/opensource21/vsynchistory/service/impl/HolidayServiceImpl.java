@@ -3,7 +3,6 @@
  */
 package com.github.opensource21.vsynchistory.service.impl;
 
-import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -17,6 +16,7 @@ import com.github.opensource21.vsynchistory.model.HolidayEvent;
 import com.github.opensource21.vsynchistory.service.api.HolidayService;
 
 import de.jollyday.Holiday;
+import de.jollyday.HolidayCalendar;
 import de.jollyday.HolidayManager;
 import de.jollyday.ManagerParameter;
 import de.jollyday.ManagerParameters;
@@ -34,9 +34,8 @@ public class HolidayServiceImpl implements HolidayService {
      */
     @Override
     public Set<HolidayEvent> getHolydays(int startYear, int endYear, String bundesland) {
-        final URL url = this.getClass().getResource("/holidays/Holydays_de.xml");
-        final ManagerParameter urlManParam = ManagerParameters.create(url, null);
-        final HolidayManager holidayManager = HolidayManager.getInstance(urlManParam);
+        final ManagerParameter managerParameter = ManagerParameters.create(HolidayCalendar.GERMANY);
+        final HolidayManager holidayManager = HolidayManager.getInstance(managerParameter);
         final Set<Holiday> hls = holidayManager.getHolidays(
                 LocalDate.of(startYear, 1, 1), LocalDate.of(endYear, 12, 31), "ni");
         final Set<HolidayEvent> result = new HashSet<>();
