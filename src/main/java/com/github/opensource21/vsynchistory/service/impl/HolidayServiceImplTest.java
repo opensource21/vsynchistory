@@ -43,7 +43,7 @@ public class HolidayServiceImplTest {
         expected[i++] =new HolidayEvent(formatter.parse("25.05.2017 00:00:00"), "Christi Himmelfahrt");
         expected[i++] =new HolidayEvent(formatter.parse("04.06.2017 00:00:00"), "Pfingstsonntag");
         expected[i++] =new HolidayEvent(formatter.parse("05.06.2017 00:00:00"), "Pfingstmontag");
-        expected[i++] =new HolidayEvent(formatter.parse("03.10.2017 00:00:00"), "Tag der Wiedervereinigung");
+        expected[i++] =new HolidayEvent(formatter.parse("03.10.2017 00:00:00"), "Tag der Deutschen Einheit");
         expected[i++] =new HolidayEvent(formatter.parse("31.10.2017 00:00:00"), "Reformationstag");
         expected[i++] =new HolidayEvent(formatter.parse("24.12.2017 00:00:00"), "Heiligabend");
         expected[i++] =new HolidayEvent(formatter.parse("25.12.2017 00:00:00"), "1. Weihnachtsfeiertag");
@@ -56,7 +56,7 @@ public class HolidayServiceImplTest {
         expected[i++] =new HolidayEvent(formatter.parse("10.05.2018 00:00:00"), "Christi Himmelfahrt");
         expected[i++] =new HolidayEvent(formatter.parse("20.05.2018 00:00:00"), "Pfingstsonntag");
         expected[i++] =new HolidayEvent(formatter.parse("21.05.2018 00:00:00"), "Pfingstmontag");
-        expected[i++] =new HolidayEvent(formatter.parse("03.10.2018 00:00:00"), "Tag der Wiedervereinigung");
+        expected[i++] =new HolidayEvent(formatter.parse("03.10.2018 00:00:00"), "Tag der Deutschen Einheit");
         expected[i++] =new HolidayEvent(formatter.parse("24.12.2018 00:00:00"), "Heiligabend");
         expected[i++] =new HolidayEvent(formatter.parse("25.12.2018 00:00:00"), "1. Weihnachtsfeiertag");
         expected[i++] =new HolidayEvent(formatter.parse("26.12.2018 00:00:00"), "2. Weihnachtsfeiertag");
