@@ -65,7 +65,8 @@ public class DailyCommit {
         importHolidays();
     }
 
-    private void importHolidays() throws IOException, ParserException, ValidationException, GitAPIException {
+    private void importHolidays()
+            throws IOException, ParserException, ValidationException, GitAPIException {
         if (StringUtils.isEmpty(holidaysCalendarsAsString)) {
             LOG.debug("Keine Kalender in holidays.calendar angegeben.");
             return;
@@ -74,7 +75,8 @@ public class DailyCommit {
         final int realStartYear = Math.max(LocalDate.now().getYear(), startYear);
         final int realEndYear = Math.max(realStartYear, endYear);
 
-        final Set<HolidayEvent> holidays = holidayService.getHolydays(realStartYear, realEndYear, "ni");
+        final Set<HolidayEvent> holidays =
+                holidayService.getHolydays(realStartYear, realEndYear, bundesland);
 
         final String[] calendars = holidaysCalendarsAsString.trim().split("[ ,]+");
         for (final String calendar : calendars) {
@@ -87,7 +89,8 @@ public class DailyCommit {
         }
     }
 
-    private void handleArchive() throws IOException, ParserException, ValidationException, GitAPIException {
+    private void handleArchive()
+            throws IOException, ParserException, ValidationException, GitAPIException {
         if (StringUtils.isEmpty(archiveUsersAsString)) {
             LOG.debug("Keine Archiv user mit archive.user angegeben.");
             return;
