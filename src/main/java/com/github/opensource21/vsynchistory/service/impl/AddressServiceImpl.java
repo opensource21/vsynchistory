@@ -1,7 +1,24 @@
-/**
- *
- */
 package com.github.opensource21.vsynchistory.service.impl;
+
+import com.github.opensource21.vsynchistory.model.DiffResult;
+import com.github.opensource21.vsynchistory.service.api.AddressService;
+import ezvcard.Ezvcard;
+import ezvcard.VCard;
+import ezvcard.io.chain.ChainingTextParser;
+import ezvcard.parameter.EmailType;
+import ezvcard.parameter.TelephoneType;
+import ezvcard.property.Address;
+import ezvcard.property.Categories;
+import ezvcard.property.DateOrTimeProperty;
+import ezvcard.property.Email;
+import ezvcard.property.FormattedName;
+import ezvcard.property.Organization;
+import ezvcard.property.StructuredName;
+import ezvcard.property.Telephone;
+import ezvcard.property.TextListProperty;
+import ezvcard.property.Title;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,31 +33,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.springframework.stereotype.Service;
-
-import com.github.opensource21.vsynchistory.model.DiffResult;
-import com.github.opensource21.vsynchistory.service.api.AddressService;
-
-import ezvcard.Ezvcard;
-import ezvcard.Ezvcard.ParserChainTextReader;
-import ezvcard.VCard;
-import ezvcard.parameter.EmailType;
-import ezvcard.parameter.TelephoneType;
-import ezvcard.property.Address;
-import ezvcard.property.Categories;
-import ezvcard.property.DateOrTimeProperty;
-import ezvcard.property.Email;
-import ezvcard.property.FormattedName;
-import ezvcard.property.Organization;
-import ezvcard.property.StructuredName;
-import ezvcard.property.Telephone;
-import ezvcard.property.TextListProperty;
-import ezvcard.property.Title;
-
 /**
  * @author niels
- *
  */
 @Service
 public class AddressServiceImpl implements AddressService {
@@ -48,25 +42,19 @@ public class AddressServiceImpl implements AddressService {
     private static final String DATE_FORMAT_WITH_TIME = "dd.MM.yyyy HH:mm:ss";
 
     @Override
-    public DiffResult compare(InputStream oldAddressbook,
-            InputStream newAddressbook) throws IOException {
+    public DiffResult compare(InputStream oldAddressbook, InputStream newAddressbook) throws IOException {
         final Map<String, VCard> oldEntries = parseAddressbook(oldAddressbook);
         final Map<String, VCard> newEntries = parseAddressbook(newAddressbook);
-        final Set<String> deletedIds =
-                getValuesOnlyInFirst(oldEntries, newEntries);
+        final Set<String> deletedIds = getValuesOnlyInFirst(oldEntries, newEntries);
         final Set<String> newIds = getValuesOnlyInFirst(newEntries, oldEntries);
 
-        final Set<String> possibleChangedIds = new HashSet<>();
-        possibleChangedIds.addAll(oldEntries.keySet());
+        final Set<String> possibleChangedIds = new HashSet<>(oldEntries.keySet());
         possibleChangedIds.removeAll(deletedIds);
 
         final StringBuilder message = new StringBuilder();
-        final DateFormat keyDateFormat =
-                new SimpleDateFormat(DATE_FORMAT_WITH_TIME);
+        final DateFormat keyDateFormat = new SimpleDateFormat(DATE_FORMAT_WITH_TIME);
         for (final String vCardId : deletedIds) {
-            message.append("DELETED: ")
-                    .append(createDescription(oldEntries.get(vCardId),
-                            keyDateFormat)).append("\n");
+            message.append("DELETED: ").append(createDescription(oldEntries.get(vCardId), keyDateFormat)).append("\n");
         }
         int nrOfChangedEvents = 0;
         for (final String vCardId : possibleChangedIds) {
@@ -75,26 +63,20 @@ public class AddressServiceImpl implements AddressService {
             final String change = getChanges(oldAddress, newAddress);
             if (StringUtils.isNotEmpty(change)) {
                 nrOfChangedEvents++;
-                message.append("CHANGED: ")
-                        .append(createDescription(oldAddress, keyDateFormat))
-                        .append("\n");
+                message.append("CHANGED: ").append(createDescription(oldAddress, keyDateFormat)).append("\n");
                 message.append(change).append("\n");
             }
 
         }
         for (final String vCardId : newIds) {
-            message.append("NEW: ")
-                    .append(createDescription(newEntries.get(vCardId),
-                            keyDateFormat)).append("\n");
+            message.append("NEW: ").append(createDescription(newEntries.get(vCardId), keyDateFormat)).append("\n");
         }
-        return new DiffResult(deletedIds.size(), newIds.size(),
-                nrOfChangedEvents, message.toString());
+        return new DiffResult(deletedIds.size(), newIds.size(), nrOfChangedEvents, message.toString());
 
     }
 
-    private Map<String, VCard> parseAddressbook(InputStream oldAddressbook)
-            throws IOException {
-        final ParserChainTextReader cardReader = Ezvcard.parse(oldAddressbook);
+    private Map<String, VCard> parseAddressbook(InputStream oldAddressbook) throws IOException {
+        final ChainingTextParser<ChainingTextParser<?>> cardReader = Ezvcard.parse(oldAddressbook);
         final Map<String, VCard> result = new HashMap<>();
         for (final VCard addressCard : cardReader.all()) {
             final String key;
@@ -118,11 +100,9 @@ public class AddressServiceImpl implements AddressService {
         return sb.toString();
     }
 
-    private void addChanges(StringBuilder sb, Map<String, Object> oldValues,
-            Map<String, Object> newValues) {
+    private void addChanges(StringBuilder sb, Map<String, Object> oldValues, Map<String, Object> newValues) {
         for (final Map.Entry<String, Object> oldValue : oldValues.entrySet()) {
-            if (!Objects.equals(oldValue.getValue(),
-                    newValues.get(oldValue.getKey()))) {
+            if (!Objects.equals(oldValue.getValue(), newValues.get(oldValue.getKey()))) {
                 sb.append(oldValue.getKey()).append(':');
                 sb.append(oldValue.getValue()).append("->");
                 sb.append(newValues.get(oldValue.getKey()));
@@ -146,8 +126,7 @@ public class AddressServiceImpl implements AddressService {
         addTitlesToMap(map, address.getTitles());
     }
 
-    private void addOrganistationsToMap(Map<String, Object> map,
-            List<Organization> organizations) {
+    private void addOrganistationsToMap(Map<String, Object> map, List<Organization> organizations) {
         Collections.sort(organizations);
         map.put("NrOfOrganizations", organizations.size());
         for (int i = 0; i < organizations.size(); i++) {
@@ -157,8 +136,7 @@ public class AddressServiceImpl implements AddressService {
 
     }
 
-    private void addTelephoneNumbersToMap(Map<String, Object> map,
-            List<Telephone> telephoneNumbers) {
+    private void addTelephoneNumbersToMap(Map<String, Object> map, List<Telephone> telephoneNumbers) {
         Collections.sort(telephoneNumbers);
         map.put("NrOfTelephoneNumbers", telephoneNumbers.size());
         for (int i = 0; i < telephoneNumbers.size(); i++) {
@@ -200,8 +178,7 @@ public class AddressServiceImpl implements AddressService {
 
     }
 
-    private void addToMap(String name, Map<String, Object> map,
-            TextListProperty categories) {
+    private void addToMap(String name, Map<String, Object> map, TextListProperty categories) {
         if (categories == null) {
             return;
         }
@@ -212,10 +189,8 @@ public class AddressServiceImpl implements AddressService {
         }
     }
 
-    private void addToMap(Map<String, Object> map, String name,
-            DateOrTimeProperty birthday, DateFormat format) {
-        final String value =
-                birthday == null ? null : format.format(birthday.getDate());
+    private void addToMap(Map<String, Object> map, String name, DateOrTimeProperty birthday, DateFormat format) {
+        final String value = birthday == null ? null : format.format(birthday.getDate());
         map.put(name, value);
 
     }
@@ -225,10 +200,8 @@ public class AddressServiceImpl implements AddressService {
         Collections.sort(addresses);
         for (int i = 0; i < addresses.size(); i++) {
             map.put("poBox[" + i + "]", addresses.get(i).getPoBox());
-            map.put("extendedAddress[" + i + "]", addresses.get(i)
-                    .getExtendedAddress());
-            map.put("streetAddress[" + i + "]", addresses.get(i)
-                    .getStreetAddress());
+            map.put("extendedAddress[" + i + "]", addresses.get(i).getExtendedAddress());
+            map.put("streetAddress[" + i + "]", addresses.get(i).getStreetAddress());
             map.put("locality[" + i + "]", addresses.get(i).getLocality());
             map.put("region[" + i + "]", addresses.get(i).getRegion());
             map.put("postalCode[" + i + "]", addresses.get(i).getPostalCode());
@@ -240,7 +213,7 @@ public class AddressServiceImpl implements AddressService {
         map.put("family", sn.getFamily());
         map.put("given", sn.getGiven());
         map.put("prefixes", StringUtils.join(sn.getPrefixes(), ", "));
-        map.put("additional", StringUtils.join(sn.getAdditional(), ", "));
+        map.put("additional", StringUtils.join(sn.getAdditionalNames(), ", "));
         map.put("suffixes", StringUtils.join(sn.getSuffixes(), ", "));
     }
 
@@ -255,18 +228,14 @@ public class AddressServiceImpl implements AddressService {
         }
         description.append('@');
         for (final Categories categories : vCard.getCategoriesList()) {
-            description.append('[')
-                    .append(StringUtils.join(categories.getValues(), "'"))
-                    .append(']');
+            description.append('[').append(StringUtils.join(categories.getValues(), "'")).append(']');
         }
         return description.toString();
     }
 
-    private Set<String> getValuesOnlyInFirst(
-            final Map<String, VCard> firstAddressbook,
+    private Set<String> getValuesOnlyInFirst(final Map<String, VCard> firstAddressbook,
             final Map<String, VCard> secondAddressbook) {
-        final Set<String> onlyFirstEntriesUid = new HashSet<>();
-        onlyFirstEntriesUid.addAll(firstAddressbook.keySet());
+        final Set<String> onlyFirstEntriesUid = new HashSet<>(firstAddressbook.keySet());
         onlyFirstEntriesUid.removeAll(secondAddressbook.keySet());
         return onlyFirstEntriesUid;
     }
